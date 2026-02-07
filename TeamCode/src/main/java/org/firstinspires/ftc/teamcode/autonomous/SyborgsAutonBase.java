@@ -5,6 +5,8 @@ import com.pedropathing.geometry.FuturePose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Common;
+import org.firstinspires.ftc.teamcode.components.LoopTimeCompenent;
+import org.firstinspires.ftc.teamcode.components.TelemetryComponent;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeTransfer;
 import org.firstinspires.ftc.teamcode.subsystems.RGBFlywheel;
@@ -27,6 +29,8 @@ public abstract class SyborgsAutonBase extends NextFTCOpMode {
 	public void onInit() {
 		Common.alliance = alliance();
 		addComponents(
+				TelemetryComponent.INSTANCE,
+				LoopTimeCompenent.INSTANCE,
 				BulkReadComponent.INSTANCE,
 				new PedroComponent(Constants::createFollower),
 				new SubsystemComponent(IntakeTransfer.INSTANCE, RGBFlywheel.INSTANCE)

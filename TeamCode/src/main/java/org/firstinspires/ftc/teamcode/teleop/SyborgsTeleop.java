@@ -20,6 +20,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Common;
 import org.firstinspires.ftc.teamcode.Drawing;
+import org.firstinspires.ftc.teamcode.components.LoopTimeCompenent;
+import org.firstinspires.ftc.teamcode.components.TelemetryComponent;
 import org.firstinspires.ftc.teamcode.control.HeadingController;
 import org.firstinspires.ftc.teamcode.localizer.LimeLightAprilTag;
 import org.firstinspires.ftc.teamcode.localizer.SensorFusion;
@@ -57,6 +59,8 @@ public class SyborgsTeleop extends NextFTCOpMode {
 
 	public SyborgsTeleop() {
 		addComponents(
+				TelemetryComponent.INSTANCE,
+				LoopTimeCompenent.INSTANCE,
 				BulkReadComponent.INSTANCE,
 				BindingsComponent.INSTANCE,
 				new PedroComponent(Constants::createFollower),
@@ -86,9 +90,6 @@ public class SyborgsTeleop extends NextFTCOpMode {
 		autoSort.update();
 
 		handleInput();
-
-		telemetry.addData("Loop time (ms)", getRuntime() * 1000 - cycleStart * 1000);
-		telemetry.update();
 	}
 
 	@Override
@@ -130,7 +131,6 @@ public class SyborgsTeleop extends NextFTCOpMode {
 					autoPark = false;
 					follower().startTeleopDrive(true);
 				});
-
 
 		double forward = -gamepad1.left_stick_y;
 		double strafe = -gamepad1.left_stick_x;
@@ -216,16 +216,19 @@ public class SyborgsTeleop extends NextFTCOpMode {
 	@Override
 	public void onWaitForStart() {
 		follower().update();
-		Pose p = follower().getPose();
-		TelemetryPacket packet = new TelemetryPacket();
-		packet.fieldOverlay().setStroke("#4CAF50");
-		Drawing.drawRobot(packet.fieldOverlay(), p);
-		FtcDashboard.getInstance().sendTelemetryPacket(packet);
+
+		drawPose("#4CAF50", follower().getPose());
 
 		telemetry.addData("Alliance (press right bumper to change): ", Common.alliance.toString());
 		gamepad1().rightBumper()
 				.whenBecomesTrue(() -> Common.alliance = Common.alliance.getOpposite());
-		telemetry.update();
+	}
+
+	private static void drawPose(String color, Pose pose) {
+		TelemetryPacket packet = new TelemetryPacket();
+		packet.fieldOverlay().setStroke(color);
+		Drawing.drawRobot(packet.fieldOverlay(), pose);
+		FtcDashboard.getInstance().sendTelemetryPacket(packet);
 	}
 
 	private void sendPoseToDash(Pose pose) {
