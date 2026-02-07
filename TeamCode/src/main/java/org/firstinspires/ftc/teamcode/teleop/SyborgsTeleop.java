@@ -162,9 +162,12 @@ public class SyborgsTeleop extends NextFTCOpMode {
 				.whenBecomesTrue(IntakeTransfer.INSTANCE.toggleOuttake);
 
 		gamepad1().dpadUp()
-				.whenBecomesTrue(() -> targetVelocity = FAR_VELOCITY);
+				.whenTrue(() -> targetVelocity = FAR_VELOCITY);
 		gamepad1().dpadDown()
-				.whenBecomesTrue(() -> targetVelocity = NORMAL_VELOCITY);
+				.whenTrue(() -> targetVelocity = NORMAL_VELOCITY);
+		gamepad1().dpadRight()
+				.whenTrue(IntakeTransfer.INSTANCE.startKicking)
+				.whenFalse(IntakeTransfer.INSTANCE.stopKicking);
 	}
 
 	private static void handleManualAdjust() {
