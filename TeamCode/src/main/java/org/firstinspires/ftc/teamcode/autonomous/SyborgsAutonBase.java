@@ -1,12 +1,19 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
+import static org.firstinspires.ftc.teamcode.Common.formatObeliskID;
+import static org.firstinspires.ftc.teamcode.pedroPathing.Drawing.drawRobot;
+import static dev.nextftc.extensions.pedro.PedroComponent.follower;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.FuturePose;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Common;
 import org.firstinspires.ftc.teamcode.components.LoopTimeCompenent;
 import org.firstinspires.ftc.teamcode.components.TelemetryComponent;
+import org.firstinspires.ftc.teamcode.localizer.LimeLightAprilTag;
+import org.firstinspires.ftc.teamcode.localizer.SensorFusion;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeTransfer;
 import org.firstinspires.ftc.teamcode.subsystems.RGBFlywheel;
@@ -36,6 +43,18 @@ public abstract class SyborgsAutonBase extends NextFTCOpMode {
 				new SubsystemComponent(IntakeTransfer.INSTANCE, RGBFlywheel.INSTANCE)
 		);
 		IntakeTransfer.INSTANCE.neutralKick.schedule();
+	}
+	public void onWaitForStart() {
+		telemetry.addData("Variant", this.getClass().getSimpleName());
+
+		LimeLightAprilTag ll = ((SensorFusion) follower().getPoseTracker().getLocalizer()).ll;
+
+		Pose pose = follower().getPose();
+		drawRobot(pose, "#4CAF50");
+		telemetry.addData("Obelisk ID", formatObeliskID(ll.getObeliskID(pose)));
+}
+	public void onStop() {
+		((SensorFusion) PedroComponent.follower().getPoseTracker().getLocalizer()).ll.close();
 	}
 
 	public abstract BasePaths getPaths(Follower follower);

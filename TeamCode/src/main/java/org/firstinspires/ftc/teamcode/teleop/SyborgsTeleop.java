@@ -1,17 +1,15 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
+import static org.firstinspires.ftc.teamcode.Common.formatObeliskID;
+import static org.firstinspires.ftc.teamcode.pedroPathing.Drawing.drawRobot;
+import static org.firstinspires.ftc.teamcode.pedroPathing.Drawing.sendPacket;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 import static dev.nextftc.ftc.Gamepads.gamepad1;
 import static dev.nextftc.ftc.Gamepads.gamepad2;
 
 import android.util.Pair;
 
-import androidx.annotation.NonNull;
-
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
@@ -19,7 +17,6 @@ import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Common;
-import org.firstinspires.ftc.teamcode.Drawing;
 import org.firstinspires.ftc.teamcode.components.LoopTimeCompenent;
 import org.firstinspires.ftc.teamcode.components.TelemetryComponent;
 import org.firstinspires.ftc.teamcode.control.HeadingController;
@@ -41,7 +38,7 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Config
+@Configurable
 @TeleOp
 public class SyborgsTeleop extends NextFTCOpMode {
 	public static final double NORMAL_VELOCITY = 1350;
@@ -72,7 +69,6 @@ public class SyborgsTeleop extends NextFTCOpMode {
 	@Override
 	public void onInit() {
 		targetVelocity = NORMAL_VELOCITY;
-		telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
 		autoSort = new AutoSort(hardwareMap, telemetry);
 		follower().startTeleopDrive(true);
@@ -217,55 +213,27 @@ public class SyborgsTeleop extends NextFTCOpMode {
 	public void onWaitForStart() {
 		follower().update();
 
-		drawPose("#4CAF50", follower().getPose());
+		drawRobot(follower().getPose(),"#4CAF50");
+		sendPacket();
 
 		telemetry.addData("Alliance (press right bumper to change): ", Common.alliance.toString());
 		gamepad1().rightBumper()
 				.whenBecomesTrue(() -> Common.alliance = Common.alliance.getOpposite());
 	}
 
-	private static void drawPose(String color, Pose pose) {
-		TelemetryPacket packet = new TelemetryPacket();
-		packet.fieldOverlay().setStroke(color);
-		Drawing.drawRobot(packet.fieldOverlay(), pose);
-		FtcDashboard.getInstance().sendTelemetryPacket(packet);
-	}
 
 	private void sendPoseToDash(Pose pose) {
 		LimeLightAprilTag ll = ((SensorFusion) follower().getPoseTracker().getLocalizer()).ll;
 		Optional<Pair<Pose, Long>> mt1Pose = ll.localizeRobotMT1();
 		Optional<Pair<Pose, Long>> mt2Pose = ll.localizeRobotMT2();
 
-		telemetry.addData("Obelisk ID", formatObelisk(ll.getObeliskID(pose)));
+		telemetry.addData("Obelisk ID", formatObeliskID(ll.getObeliskID(pose)));
 
-		TelemetryPacket packet = new TelemetryPacket();
-		packet.fieldOverlay().setStroke("#4CAF50");
-		mt1Pose.ifPresent(p -> Drawing.drawRobot(packet.fieldOverlay(), p.first));
-		packet.fieldOverlay().setStroke("#FF5722");
-		mt2Pose.ifPresent(p -> Drawing.drawRobot(packet.fieldOverlay(), p.first));
-		packet.fieldOverlay().setStroke("#3F51B5");
-		Drawing.drawRobot(packet.fieldOverlay(), pose);
-		FtcDashboard.getInstance().sendTelemetryPacket(packet);
+		mt1Pose.ifPresent(p -> drawRobot(p.first, "#4CAF50"));
+		mt2Pose.ifPresent(p -> drawRobot(p.first, "#FF5722"));
+		drawRobot(pose, "#3F51B5");
+		sendPacket();
 
 		telemetry.addData("Pose (x, y, headingDegrees)", "%.2f, %.2f, %.2f", pose.getX(), pose.getY(), Math.toDegrees(pose.getHeading()));
-	}
-
-	@NonNull
-	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-	private static String formatObelisk(OptionalInt x) {
-		if (x.isPresent()) {
-			int xValue = x.getAsInt();
-			switch (xValue) {
-				case 21:
-					return "GPP";
-				case 22:
-					return "PGP";
-				case 23:
-					return "PPG";
-				default:
-					return Integer.toString(xValue);
-			}
-		}
-		return "No obelisk apriltag visible";
 	}
 }

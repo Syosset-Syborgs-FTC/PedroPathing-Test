@@ -1,11 +1,37 @@
 package org.firstinspires.ftc.teamcode;
 
+import androidx.annotation.NonNull;
+
+import com.bylazar.field.FieldManager;
+import com.bylazar.field.PanelsField;
+import com.bylazar.panels.Panels;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.MathFunctions;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import java.util.OptionalInt;
+
 public class Common {
+	@NonNull
+	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+	public static String formatObeliskID(OptionalInt x) {
+		if (x.isPresent()) {
+			int xValue = x.getAsInt();
+			switch (xValue) {
+				case 21:
+					return "GPP";
+				case 22:
+					return "PGP";
+				case 23:
+					return "PPG";
+				default:
+					return Integer.toString(xValue);
+			}
+		}
+		return "No obelisk apriltag visible";
+	}
+
 	public enum Alliance {
 		Red,
 		Blue;

@@ -1,9 +1,10 @@
 package org.firstinspires.ftc.teamcode.localizer;
 
+import static org.firstinspires.ftc.teamcode.pedroPathing.Drawing.drawRobot;
+import static org.firstinspires.ftc.teamcode.pedroPathing.Drawing.sendPacket;
+
 import android.util.Pair;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.pedropathing.ftc.InvertedFTCCoordinates;
 import com.pedropathing.ftc.PoseConverter;
 import com.pedropathing.geometry.Pose;
@@ -18,7 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.teamcode.Common;
-import org.firstinspires.ftc.teamcode.Drawing;
+import org.firstinspires.ftc.teamcode.pedroPathing.Drawing;
 
 import java.util.Arrays;
 import java.util.List;
@@ -106,10 +107,9 @@ public class LimeLightAprilTag {
 					Pose aprilTagInRobotSpace = flattenPose3DTo2d(fiducial.getTargetPoseRobotSpace());
 					Pose aprilTagInFieldSpace = applyTransform(robotPose.getAsCoordinateSystem(InvertedFTCCoordinates.INSTANCE), aprilTagInRobotSpace); // apply transformation
 
-					TelemetryPacket packet = new TelemetryPacket();
-					packet.fieldOverlay().setStroke("#000000");
-					Drawing.drawRobot(packet.fieldOverlay(), aprilTagInFieldSpace);
-					FtcDashboard.getInstance().sendTelemetryPacket(packet);
+					drawRobot(aprilTagInFieldSpace, "#000000");
+					sendPacket();
+
 					double heading = aprilTagInFieldSpace.getHeading(); // [-pi, pi]
 
 					if (Math.abs(heading) < Math.toRadians(20)) {
