@@ -44,9 +44,11 @@ public class IntakeTransfer  implements Subsystem {
 			startOuttake.run();
 		}
 	});
-	CRServoEx transfer, cycle;
+	CRServoEx transfer = new CRServoEx("tn");
+	CRServoEx cycle = new CRServoEx("ts");
 
-	ServoEx chuck, kicker;
+	ServoEx chuck = new ServoEx("c");
+	ServoEx kicker = new ServoEx("k");
 	public Command startFeeding = new InstantCommand(() -> {
 		feeding = true;
 	});
@@ -60,10 +62,6 @@ public class IntakeTransfer  implements Subsystem {
 	public Command stopKicking = new SetPosition(kicker, 0.1);
 	public Command neutralKick = new SetPosition(kicker, 0);
 	public void initialize() {
-		transfer = new CRServoEx("tn");
-		cycle = new CRServoEx("ts");
-		kicker = new ServoEx("k");
-		chuck = new ServoEx("c");
 		intake = ActiveOpMode.hardwareMap().dcMotor.get("in");
 
 		new SequentialGroup(

@@ -35,7 +35,7 @@ public class LimeLightAprilTag {
 		forwarder = new PortForwarder("172.29.0.1", 5800, 5801, 5802, 5803, 5804, 5805, 5806, 5807, 5808, 5809);
 		forwarder.start();
 
-		limelight.setPollRateHz(50);
+		limelight.setPollRateHz(30);
 		limelight.start();
 	}
 

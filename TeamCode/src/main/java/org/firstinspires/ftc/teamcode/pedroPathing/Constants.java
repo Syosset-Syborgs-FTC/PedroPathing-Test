@@ -24,10 +24,13 @@ public class Constants {
 	public static MecanumConstants driveConstants = new MecanumConstants()
 			.maxPower(1)
 			.leftFrontMotorName("FL")
+			.leftRearMotorName("BL")
 			.rightRearMotorName("BR")
 			.rightFrontMotorName("FR")
-			.leftRearMotorName("BL")
-			.leftRearMotorDirection(DcMotorSimple.Direction.REVERSE);
+			.leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
+			.leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
+			.rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
+			.rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
 		SensorFusion fusion = new SensorFusion(hardwareMap, localizerConstants);

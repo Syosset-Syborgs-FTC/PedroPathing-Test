@@ -28,7 +28,6 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous
 public abstract class SyborgsAutonBase extends NextFTCOpMode {
 	public static FuturePose currentPose = () -> PedroComponent.follower().getPose();
 	public abstract Common.Alliance alliance();

@@ -10,6 +10,7 @@ import static dev.nextftc.ftc.Gamepads.gamepad2;
 import android.util.Pair;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.field.Style;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
@@ -23,6 +24,7 @@ import org.firstinspires.ftc.teamcode.control.HeadingController;
 import org.firstinspires.ftc.teamcode.localizer.LimeLightAprilTag;
 import org.firstinspires.ftc.teamcode.localizer.SensorFusion;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.Drawing;
 import org.firstinspires.ftc.teamcode.subsystems.AutoSort;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeTransfer;
 import org.firstinspires.ftc.teamcode.subsystems.RGBFlywheel;
@@ -73,10 +75,8 @@ public class SyborgsTeleop extends NextFTCOpMode {
 		autoSort = new AutoSort(hardwareMap, telemetry);
 		follower().startTeleopDrive(true);
 
-		new ParallelGroup(
-				RGBFlywheel.INSTANCE.setAnglerPosition(() -> anglerPosition),
-				RGBFlywheel.INSTANCE.setVelocity(() -> flywheelEnabled? targetVelocity : 0)
-		).perpetually().schedule();
+
+		handleInput();
 	}
 
 	@Override
@@ -84,8 +84,12 @@ public class SyborgsTeleop extends NextFTCOpMode {
 		double cycleStart = getRuntime();
 		OptionalInt currentObeliskID = ((SensorFusion) follower().getPoseTracker().getLocalizer()).getObeliskID();
 		autoSort.update();
+		driveRobot();
+		new ParallelGroup(
+				RGBFlywheel.INSTANCE.setAnglerPosition(() -> anglerPosition),
+				RGBFlywheel.INSTANCE.setVelocity(() -> flywheelEnabled? targetVelocity : 0)
+		).schedule();
 
-		handleInput();
 	}
 
 	@Override
@@ -94,13 +98,13 @@ public class SyborgsTeleop extends NextFTCOpMode {
 	}
 
 	private void handleInput() {
-		handleDriveInput();
-		handleShooterInput();
 		handleManualAdjust();
+		handleShooterInput();
+		handleDriveConfig();
 
 	}
 
-	private void handleDriveInput() {
+	private void handleDriveConfig() {
 		gamepad1().y()
 				.whenBecomesTrue(() -> autoAlign = !autoAlign)
 				.toggleOnBecomesTrue()
@@ -127,17 +131,6 @@ public class SyborgsTeleop extends NextFTCOpMode {
 					autoPark = false;
 					follower().startTeleopDrive(true);
 				});
-
-		double forward = -gamepad1.left_stick_y;
-		double strafe = -gamepad1.left_stick_x;
-		double rotate = -gamepad1.right_stick_x;
-
-		if (slowDrive) {
-			forward *= 0.4;
-			strafe *= 0.4;
-			rotate *= 0.4;
-		}
-		driveRobot(forward, strafe, rotate);
 	}
 
 	private void handleShooterInput() {
@@ -186,21 +179,33 @@ public class SyborgsTeleop extends NextFTCOpMode {
 		anglerPosition += delta;
 	}
 
-	private void driveRobot(double forward, double strafe, double rotate) {
+	private void driveRobot() {
+		double forward = -gamepad1.left_stick_y;
+		double strafe = -gamepad1.left_stick_x;
+		double rotate = -gamepad1.right_stick_x;
+
+		if (slowDrive) {
+			forward *= 0.4;
+			strafe *= 0.4;
+			rotate *= 0.4;
+		}
 		telemetry.addData("Auto Align", autoAlign);
 		follower().update();
 
 		Pose pose = follower().getPose();
-		double alignX = Common.alliance == Common.Alliance.Blue ? 6 : 138;
-		double alignY = 141;
+		double alignX = -141;
+		double alignY = Common.alliance == Common.Alliance.Blue ? 6 : 138;
 		double turnPower = headingController.getTurnPower(pose, alignX, alignY);
 		telemetry.addData("Turn Power", turnPower);
 
-		// robot centric set to false, we handle field centric control ourselves
-		Vector input = new Vector(forward, strafe);
-		input.rotateVector(-((SensorFusion) follower().getPoseTracker().getLocalizer()).getRawPinpointHeading());
-		follower().setTeleOpDrive(input.getXComponent(), input.getYComponent(), autoAlign ? turnPower : rotate, true, headingOffset);
+		Vector input = new Vector();
+		input.setOrthogonalComponents(forward, strafe);
 
+		input.rotateVector(-((SensorFusion) follower().getPoseTracker().getLocalizer()).getRawPinpointHeading());
+		follower().setTeleOpDrive(input.getXComponent(), input.getYComponent(), autoAlign? turnPower : rotate, true, headingOffset);
+		Drawing.panelsField.setStyle(new Style("#FFFFFF", "#FFFFFF", 1));
+		Drawing.panelsField.moveCursor(0, 0);
+		Drawing.panelsField.line(input.getXComponent()*10, input.getYComponent()*10);
 		if (autoPark && !follower().isBusy()) {
 			follower().startTeleopDrive(true);
 		}
