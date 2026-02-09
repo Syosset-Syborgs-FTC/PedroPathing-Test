@@ -24,9 +24,9 @@ public class Constants {
 	public static MecanumConstants driveConstants = new MecanumConstants()
 			.maxPower(1)
 			.leftFrontMotorName("FL")
-			.rightRearMotorName("BL")
+			.rightRearMotorName("BR")
 			.rightFrontMotorName("FR")
-			.leftRearMotorName("BR")
+			.leftRearMotorName("BL")
 			.leftRearMotorDirection(DcMotorSimple.Direction.REVERSE);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
