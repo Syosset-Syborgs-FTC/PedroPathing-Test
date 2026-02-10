@@ -7,10 +7,9 @@ import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.FuturePose;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Common;
-import org.firstinspires.ftc.teamcode.components.LoopTimeCompenent;
+import org.firstinspires.ftc.teamcode.components.PanelsPacketComponent;
 import org.firstinspires.ftc.teamcode.components.TelemetryComponent;
 import org.firstinspires.ftc.teamcode.localizer.LimeLightAprilTag;
 import org.firstinspires.ftc.teamcode.localizer.SensorFusion;
@@ -27,6 +26,7 @@ import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
+import dev.nextftc.ftc.components.LoopTimeComponent;
 
 public abstract class SyborgsAutonBase extends NextFTCOpMode {
 	public static FuturePose currentPose = () -> PedroComponent.follower().getPose();
@@ -36,7 +36,8 @@ public abstract class SyborgsAutonBase extends NextFTCOpMode {
 		Common.alliance = alliance();
 		addComponents(
 				TelemetryComponent.INSTANCE,
-				LoopTimeCompenent.INSTANCE,
+				new LoopTimeComponent(),
+				PanelsPacketComponent.INSTANCE,
 				BulkReadComponent.INSTANCE,
 				new PedroComponent(Constants::createFollower),
 				new SubsystemComponent(IntakeTransfer.INSTANCE, RGBFlywheel.INSTANCE)

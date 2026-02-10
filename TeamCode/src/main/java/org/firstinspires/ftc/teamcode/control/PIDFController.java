@@ -19,7 +19,7 @@ public class PIDFController {
 	private boolean initialized = false;
 
 	private double outputMin = -1.0;
-	private double outputMax =  1.0;
+	private double outputMax = 1.0;
 	private double maxIntegralContribution = 1.0;
 
 	private double derivativeTau = 0.02;
@@ -42,6 +42,9 @@ public class PIDFController {
 		this.continuous = continuous;
 		this.inputMin = minInput;
 		this.inputMax = maxInput;
+		if (continuous) {
+			if (maxInput <= minInput) throw new IllegalArgumentException("maxInput must be > minInput");
+		}
 	}
 
 	public void setTarget(double target, boolean resetIntegrator) {
@@ -51,15 +54,24 @@ public class PIDFController {
 		}
 	}
 
-	public void setTarget(double target) { setTarget(target, false); }
+	public void setTarget(double target) {
+		setTarget(target, false);
+	}
 
 	public void setEnabled(boolean enabled) {
+		if (enabled && !this.enabled) {
+			reset();
+		}
 		this.enabled = enabled;
 	}
+
 	public boolean getEnabled() {
 		return enabled;
 	}
-	public double getTarget() { return target; }
+
+	public double getTarget() {
+		return target;
+	}
 
 	public void setOutputLimits(double min, double max) {
 		if (max <= min) throw new IllegalArgumentException("max must be > min");
@@ -76,12 +88,7 @@ public class PIDFController {
 	}
 
 	public void reset() {
-		integralSum = 0.0;
-		filteredDerivative = 0.0;
-		lastError = 0.0;
-		lastMeasurement = 0.0;
 		initialized = false;
-		lastTime = 0.0;
 	}
 
 
@@ -96,8 +103,9 @@ public class PIDFController {
 
 
 	public double update(double measurement, double feedForward) {
-		double now = time();
+		if (!enabled) return 0.0;
 
+		double now = time();
 		double rawError = target - measurement;
 		double error = wrapError(rawError);
 
@@ -105,65 +113,63 @@ public class PIDFController {
 			lastTime = now;
 			lastError = error;
 			lastMeasurement = measurement;
-
 			filteredDerivative = 0.0;
+			integralSum = 0.0;
 			initialized = true;
-
 			double p = kP * lastError;
 			return Range.clip(p + feedForward, outputMin, outputMax);
 		}
 
 		double dt = now - lastTime;
-
-		if (dt < 1e-9) {
-			dt = 1e-9;
-		}
+		lastTime = now;
+		if (dt < 1e-9) dt = 1e-9;
 
 		double pTerm = kP * error;
 
-		double integralProposed = integralSum + 0.5 * (error + lastError) * dt;
-
-		if (kI != 0.0) {
-			double maxIntegral = maxIntegralContribution / Math.abs(kI);
-			integralProposed = Range.clip(integralProposed, -maxIntegral, maxIntegral);
-		}
-
 		double measurementDiff = lastMeasurement - measurement;
-		// wrap the error in the angle, non-continuous mode is a no-op
 		measurementDiff = wrapError(measurementDiff);
 
 		double rawDerivative = measurementDiff / dt;
-
 		double alpha = dt / (derivativeTau + dt);
 		filteredDerivative = alpha * rawDerivative + (1.0 - alpha) * filteredDerivative;
 		double dTerm = kD * filteredDerivative;
 
-		double iTermProposed = kI * integralProposed;
-		double unclipped = pTerm + iTermProposed + dTerm + feedForward;
+		double iTerm = 0.0;
 
-		double clipped = Range.clip(unclipped, outputMin, outputMax);
-		boolean wouldSaturate = Math.abs(unclipped - clipped) > EPS;
+		if (Math.abs(kI) > 1e-9) {
+			double integralProposed = integralSum + 0.5 * (error + lastError) * dt;
 
-		if (!wouldSaturate) {
-			integralSum = integralProposed;
-		} else {
-			double currentITerm = kI * integralSum;
-			boolean reducesSaturation =
-					(unclipped > outputMax && iTermProposed < currentITerm) ||
-							(unclipped < outputMin && iTermProposed > currentITerm);
+			double maxIntegral = maxIntegralContribution / Math.abs(kI);
+			integralProposed = Range.clip(integralProposed, -maxIntegral, maxIntegral);
 
-			if (reducesSaturation) {
+			double iTermProposed = kI * integralProposed;
+
+			double unclipped = pTerm + iTermProposed + dTerm + feedForward;
+			double clipped = Range.clip(unclipped, outputMin, outputMax);
+
+			boolean wouldSaturate = Math.abs(unclipped - clipped) > EPS;
+
+			if (!wouldSaturate) {
 				integralSum = integralProposed;
-			}
-		}
+			} else {
+				double currentITerm = kI * integralSum;
+				boolean reducesSaturation =
+						(unclipped > outputMax && iTermProposed < currentITerm) ||
+								(unclipped < outputMin && iTermProposed > currentITerm);
 
-		double iTerm = kI * integralSum;
-		double output = pTerm + iTerm + dTerm + feedForward;
+				if (reducesSaturation) {
+					integralSum = integralProposed;
+				}
+			}
+			iTerm = kI * integralSum;
+		} else {
+			integralSum = 0.0;
+		}
 
 		lastError = error;
 		lastMeasurement = measurement;
-		lastTime = now;
 
+		double output = pTerm + iTerm + dTerm + feedForward;
 		return Range.clip(output, outputMin, outputMax);
 	}
 

@@ -37,6 +37,9 @@ public class RGBFlywheel implements Subsystem {
 	public Command setVelocity(DoubleSupplier velocity) {
 		return new InstantCommand(() -> this.targetVelocity = velocity.getAsDouble());
 	}
+	public void setVelocityNow(double velocity) {
+		this.targetVelocity = velocity;
+	}
 	public Command enableAutoAlign = new InstantCommand(() -> this.autoAlignIndicator = true);
 	public Command disableAutoAlign = new InstantCommand(() -> this.autoAlignIndicator = false);
 	ServoEx angler;
@@ -45,6 +48,9 @@ public class RGBFlywheel implements Subsystem {
 	}
 	public Command setAnglerPosition(DoubleSupplier position) {
 		return new InstantCommand(() -> angler.setPosition(position.getAsDouble()));
+	}
+	public void setAnglerPositionNow(double position) {
+		angler.setPosition(position);
 	}
 
 	public double getAnglerPosition() {
@@ -83,20 +89,24 @@ public class RGBFlywheel implements Subsystem {
 		}
 	}
 
+	private double cachedVoltage = 12.0;
+	private int loopCount = 0;
 	private double updateFlywheel() {
-		double reading = voltage.getVoltage();
+		if (loopCount++ % 20 == 0) {
+			cachedVoltage = voltage.getVoltage();
+		}
 		flywheelController.setConstants(kP, kI, kD);
 		flywheelController.setTarget(targetVelocity);
 		double currentVelocity = flywheel.getVelocity();
 
-		double power = flywheelController.update(currentVelocity, targetVelocity * kF / reading);
+		double power = flywheelController.update(currentVelocity, targetVelocity * kF / cachedVoltage);
 		Telemetry telemetry = ActiveOpMode.telemetry();
 		if (flywheel.getMotor().isOverCurrent()) {
 			telemetry.addLine("Flywheel is over current!");
 		}
 		telemetry.addData("Flywheel", currentVelocity);
 		telemetry.addData("Flywheel Target", targetVelocity);
-		telemetry.addData("Flywheel Current", flywheel.getMotor().getCurrent(CurrentUnit.AMPS));
+//		telemetry.addData("Flywheel Current", flywheel.getMotor().getCurrent(CurrentUnit.AMPS));
 		telemetry.addData("Flywheel Power", power);
 
 		flywheel.setPower(power);

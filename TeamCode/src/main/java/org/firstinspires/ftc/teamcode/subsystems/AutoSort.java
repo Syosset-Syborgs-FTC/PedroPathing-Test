@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -30,9 +32,10 @@ public class AutoSort {
     }
 
     private int getColor(ColorRangeSensor s) {
-            double r = s.getNormalizedColors().red;
-            double g = s.getNormalizedColors().green;
-            double b = s.getNormalizedColors().blue;
+		NormalizedRGBA colors = s.getNormalizedColors();
+            double r = colors.red;
+			double g = colors.green;
+			double b = colors.blue;
 			telemetry.addData("color", "%f %f %f", r,g, b);
 
 		telemetry.addData("color2", s.getNormalizedColors().toColor());

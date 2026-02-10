@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.control;
 
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.MathFunctions;
+import com.pedropathing.math.Vector;
 
 import org.firstinspires.ftc.teamcode.Common;
 
@@ -42,6 +43,11 @@ public class PoseFilter {
 
 	public Pose getPose(Pose rawPose) {
 		return Common.applyTransform(offset, rawPose);
+	}
+	public Pose getVelocity(Pose rawVel) {
+		Vector vec = rawVel.getAsVector();
+		vec.rotateVector(offset.getHeading());
+		return new Pose(vec.getXComponent(), vec.getYComponent(), rawVel.getHeading());
 	}
 
 	public void updateOdometry(Pose rawPinpointPose, long timestampNs) {

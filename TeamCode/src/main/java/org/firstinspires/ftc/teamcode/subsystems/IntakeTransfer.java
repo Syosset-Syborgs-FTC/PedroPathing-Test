@@ -8,13 +8,14 @@ import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.CRServoEx;
+import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.hardware.impl.ServoEx;
 import dev.nextftc.hardware.positionable.SetPosition;
 
 public class IntakeTransfer  implements Subsystem {
 	public static final IntakeTransfer INSTANCE = new IntakeTransfer();
 	boolean feeding = false;
-	DcMotor intake;
+	MotorEx intake = new MotorEx("in");
 	int intakeState = 0;
 	double intakeStartTime = 0;
 	public Command startIntake = new InstantCommand(() -> {
@@ -62,8 +63,6 @@ public class IntakeTransfer  implements Subsystem {
 	public Command stopKicking = new SetPosition(kicker, 0.1);
 	public Command neutralKick = new SetPosition(kicker, 0);
 	public void initialize() {
-		intake = ActiveOpMode.hardwareMap().dcMotor.get("in");
-
 		new SequentialGroup(
 				stopIntake,
 				stopFeeding,

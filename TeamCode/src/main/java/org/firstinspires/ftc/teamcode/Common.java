@@ -14,11 +14,9 @@ import java.util.OptionalInt;
 
 public class Common {
 	@NonNull
-	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-	public static String formatObeliskID(OptionalInt x) {
-		if (x.isPresent()) {
-			int xValue = x.getAsInt();
-			switch (xValue) {
+	public static String formatObeliskID(int x) {
+		if (x != -1) {
+			switch (x) {
 				case 21:
 					return "GPP";
 				case 22:
@@ -26,7 +24,7 @@ public class Common {
 				case 23:
 					return "PPG";
 				default:
-					return Integer.toString(xValue);
+					return Integer.toString(x);
 			}
 		}
 		return "No obelisk apriltag visible";

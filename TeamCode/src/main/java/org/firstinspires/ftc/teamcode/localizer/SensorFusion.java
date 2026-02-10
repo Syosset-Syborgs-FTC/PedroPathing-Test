@@ -1,16 +1,19 @@
 package org.firstinspires.ftc.teamcode.localizer;
 
+import android.util.Pair;
+
 import com.pedropathing.ftc.localization.constants.PinpointConstants;
 import com.pedropathing.ftc.localization.localizers.PinpointLocalizer;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.localization.Localizer;
 import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.control.PoseFilter;
 
 import java.util.Objects;
-import java.util.OptionalInt;
+import java.util.Optional;
 
 public class SensorFusion implements Localizer {
 	Pose startPose;
@@ -18,6 +21,8 @@ public class SensorFusion implements Localizer {
 	PoseFilter filter = new PoseFilter();
 	PinpointLocalizer pinpointLocalizer;
 	public LimeLightAprilTag ll;
+	public Optional<Pose> cachedMT1Pose = Optional.of(new Pose());
+	public Optional<Pose> cachedMT2Pose = Optional.of(new Pose());
 
 	public SensorFusion(HardwareMap hardwareMap, PinpointConstants pinpointConstants) {
 		pinpointLocalizer = new PinpointLocalizer(hardwareMap, pinpointConstants, new Pose(0, 0, 0));
@@ -31,7 +36,8 @@ public class SensorFusion implements Localizer {
 
 	@Override
 	public Pose getVelocity() {
-		return filter.getPose(pinpointLocalizer.getVelocity()); // TODO: check if this is correct
+		Pose rawVel = pinpointLocalizer.getVelocity();
+		return filter.getVelocity(rawVel);
 	}
 
 	@Override
@@ -58,16 +64,24 @@ public class SensorFusion implements Localizer {
 		filter.setPose(pinpointLocalizer.getPose(), setPose);
 	}
 
+	ElapsedTime orientationTimer = new ElapsedTime();
+
 	@Override
 	public void update() {
 		pinpointLocalizer.update();
 		filter.updateOdometry(pinpointLocalizer.getPose(), System.nanoTime());
-		ll
-			.localizeRobotMT1()
+		Optional<Pair<Pose, Long>> mt1Result = ll
+				.localizeRobotMT1();
+		mt1Result
 			.ifPresent(pair -> {
 				filter.updateVision(pair.first, pair.second);
 			});
-		ll.updateRobotOrientation(filter.getPose(pinpointLocalizer.getPose()).getHeading());
+		cachedMT1Pose = mt1Result.map(p -> p.first);
+		cachedMT2Pose = ll.localizeRobotMT2().map(p -> p.first);
+		if (orientationTimer.milliseconds() > 100) {
+			ll.updateRobotOrientation(filter.getPose(pinpointLocalizer.getPose()).getHeading());
+			orientationTimer.reset();
+		}
 	}
 
 	@Override
@@ -108,7 +122,7 @@ public class SensorFusion implements Localizer {
 	public double getRawPinpointHeading() {
 		return pinpointLocalizer.getPose().getHeading();
 	}
-	public OptionalInt getObeliskID() {
+	public int getObeliskID() {
 		return ll.getObeliskID(getPose());
 	}
 }

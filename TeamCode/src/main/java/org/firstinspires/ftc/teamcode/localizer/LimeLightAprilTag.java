@@ -33,7 +33,7 @@ public class LimeLightAprilTag {
 	public LimeLightAprilTag(HardwareMap hardwareMap) {
 		limelight = hardwareMap.get(Limelight3A.class, "LimeLight3A");
 		forwarder = new PortForwarder("172.29.0.1", 5800, 5801, 5802, 5803, 5804, 5805, 5806, 5807, 5808, 5809);
-		forwarder.start();
+//		forwarder.start();
 
 		limelight.setPollRateHz(30);
 		limelight.start();
@@ -87,7 +87,7 @@ public class LimeLightAprilTag {
 		return new Pose(x, y, h, robot.getCoordinateSystem());
 	}
 
-	public OptionalInt getObeliskID(Pose robotPose) {
+	public int getObeliskID(Pose robotPose) {
 		LLResult result = limelight.getLatestResult();
 		if (result != null && result.isValid()) {
 			List<LLResultTypes.FiducialResult> fiducials = result
@@ -97,10 +97,10 @@ public class LimeLightAprilTag {
 							x.getFiducialId() == 21 || x.getFiducialId() == 22 || x.getFiducialId() == 23
 					) // filter for obelisk tags
 					.collect(Collectors.toList());
-			if (fiducials.isEmpty()) return OptionalInt.empty();
+			if (fiducials.isEmpty()) return -1;
 
 			if (fiducials.size() == 1) {
-				return OptionalInt.of(fiducials.get(0).getFiducialId());
+				return fiducials.get(0).getFiducialId();
 			} else {
 				// return the apriltag that is facing the field
 				for (LLResultTypes.FiducialResult fiducial : fiducials) {
@@ -108,17 +108,16 @@ public class LimeLightAprilTag {
 					Pose aprilTagInFieldSpace = applyTransform(robotPose.getAsCoordinateSystem(InvertedFTCCoordinates.INSTANCE), aprilTagInRobotSpace); // apply transformation
 
 					drawRobot(aprilTagInFieldSpace, "#000000");
-					sendPacket();
 
 					double heading = aprilTagInFieldSpace.getHeading(); // [-pi, pi]
 
 					if (Math.abs(heading) < Math.toRadians(20)) {
-						return OptionalInt.of(fiducial.getFiducialId());
+						return fiducial.getFiducialId();
 					}
 				}
 			}
 		}
-		return OptionalInt.empty();
+		return -1;
 	}
 	public void close() {
 		forwarder.stop();
