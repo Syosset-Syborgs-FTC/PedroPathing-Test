@@ -40,8 +40,11 @@ public class RGBFlywheel implements Subsystem {
 	public void setVelocityNow(double velocity) {
 		this.targetVelocity = velocity;
 	}
-	public Command enableAutoAlign = new InstantCommand(() -> this.autoAlignIndicator = true);
-	public Command disableAutoAlign = new InstantCommand(() -> this.autoAlignIndicator = false);
+	public Command enableAutoAlign = new InstantCommand(() -> setAutoAlignEnabled(true));
+	public void setAutoAlignEnabled(boolean enabled) {
+		autoAlignIndicator = enabled;
+	}
+	public Command disableAutoAlign = new InstantCommand(() -> setAutoAlignEnabled(false));
 	ServoEx angler;
 	public Command setAnglerPosition(double position) {
 		return new SetPosition(angler, position);

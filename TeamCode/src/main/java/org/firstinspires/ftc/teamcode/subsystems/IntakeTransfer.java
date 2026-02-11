@@ -24,7 +24,6 @@ public class IntakeTransfer  implements Subsystem {
 	});
 	public Command startOuttake = new InstantCommand(() -> {
 		intakeState = -1;
-		feeding = false;
 	});
 	public Command stopIntake = new InstantCommand(() -> {
 		intakeState = 0;
@@ -62,6 +61,12 @@ public class IntakeTransfer  implements Subsystem {
 	public Command startKicking = new SetPosition(kicker, 0.3);
 	public Command stopKicking = new SetPosition(kicker, 0.1);
 	public Command neutralKick = new SetPosition(kicker, 0);
+	public Command toggleFeeding = new InstantCommand(() -> {
+		if (!feeding) {
+			startChucking.schedule();
+		}
+		feeding = !feeding;
+	});
 	public void initialize() {
 		new SequentialGroup(
 				stopIntake,
