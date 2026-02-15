@@ -8,12 +8,14 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Common;
+
 @Autonomous
 public class RedAuton extends SyborgsAutonBase {
 	@Override
 	public Common.Alliance alliance() {
 		return Common.Alliance.Red;
 	}
+
 	public BasePaths getPaths(Follower follower) {
 		return new RedAuton.Paths(follower);
 	}
@@ -31,8 +33,8 @@ public class RedAuton extends SyborgsAutonBase {
 		public Paths(Follower follower) {
 			Preload = follower.pathBuilder().addPath(
 							new BezierCurve(
-									currentPose,
-//									new Pose(88.000, 8.000),
+//									currentPose,
+									new Pose(88.000, 8.000),
 									new Pose(83.693, 79.971),
 									new Pose(91.141, 89.897)
 							)
@@ -120,6 +122,45 @@ public class RedAuton extends SyborgsAutonBase {
 
 					.build();
 		}
-	}
 
+		@Override
+		public PathChain getPreload() {
+			return Preload;
+		}
+
+		@Override
+		public PathChain getGPP() {
+			return GPP;
+		}
+
+		@Override
+		public PathChain getGPPReturn() {
+			return GPPReturn;
+		}
+
+		@Override
+		public PathChain getPGP() {
+			return PGP;
+		}
+
+		@Override
+		public PathChain getPGPReturn() {
+			return PGPReturn;
+		}
+
+		@Override
+		public PathChain getPPG() {
+			return PPG;
+		}
+
+		@Override
+		public PathChain getPPGReturn() {
+			return PPGReturn;
+		}
+
+		@Override
+		public PathChain getLeaveZone() {
+			return LeaveZone;
+		}
+	}
 }

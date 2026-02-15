@@ -30,10 +30,10 @@ import dev.nextftc.ftc.components.LoopTimeComponent;
 
 public abstract class SyborgsAutonBase extends NextFTCOpMode {
 	public static FuturePose currentPose = () -> PedroComponent.follower().getPose();
+
 	public abstract Common.Alliance alliance();
-	@Override
-	public void onInit() {
-		Common.alliance = alliance();
+
+	public SyborgsAutonBase() {
 		addComponents(
 				TelemetryComponent.INSTANCE,
 				new LoopTimeComponent(),
@@ -42,8 +42,13 @@ public abstract class SyborgsAutonBase extends NextFTCOpMode {
 				new PedroComponent(Constants::createFollower),
 				new SubsystemComponent(IntakeTransfer.INSTANCE, RGBFlywheel.INSTANCE)
 		);
+		Common.alliance = alliance();
+	}
+
+	public void onInit() {
 		IntakeTransfer.INSTANCE.neutralKick.schedule();
 	}
+
 	public void onWaitForStart() {
 		telemetry.addData("Variant", this.getClass().getSimpleName());
 
@@ -52,30 +57,28 @@ public abstract class SyborgsAutonBase extends NextFTCOpMode {
 		Pose pose = follower().getPose();
 		drawRobot(pose, "#4CAF50");
 		telemetry.addData("Obelisk ID", formatObeliskID(ll.getObeliskID(pose)));
-}
-	public void onStop() {
-		((SensorFusion) PedroComponent.follower().getPoseTracker().getLocalizer()).ll.close();
 	}
 
+
 	public abstract BasePaths getPaths(Follower follower);
+
 	public void onStartButtonPressed() {
 		RGBFlywheel.INSTANCE.setVelocity(1280).schedule();
 		BasePaths paths = getPaths(PedroComponent.follower());
-
 		new SequentialGroup(
 				IntakeTransfer.INSTANCE.startIntake,
-				new FollowPath(paths.Preload),
+				new FollowPath(paths.getPreload()),
 				preloadShootCommand(),
-				new FollowPath(paths.GPP),
-				new FollowPath(paths.GPPReturn),
+				new FollowPath(paths.getGPP()),
+				new FollowPath(paths.getGPPReturn()),
 				shootCommand(),
-				new FollowPath(paths.PGP),
-				new FollowPath(paths.PGPReturn),
+				new FollowPath(paths.getPGP()),
+				new FollowPath(paths.getPGPReturn()),
 				shootCommand(),
-				new FollowPath(paths.PPG),
-				new FollowPath(paths.PPGReturn),
+				new FollowPath(paths.getPPG()),
+				new FollowPath(paths.getPPGReturn()),
 				shootCommand(),
-				new FollowPath(paths.LeaveZone)
+				new FollowPath(paths.getLeaveZone())
 		).schedule();
 	}
 

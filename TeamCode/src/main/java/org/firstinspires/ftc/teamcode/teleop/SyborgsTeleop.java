@@ -6,7 +6,6 @@ import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 import static dev.nextftc.ftc.Gamepads.gamepad1;
 import static dev.nextftc.ftc.Gamepads.gamepad2;
 
-import android.util.Pair;
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -25,7 +24,6 @@ import org.firstinspires.ftc.teamcode.subsystems.RGBFlywheel;
 
 import java.util.Optional;
 
-import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -47,6 +45,7 @@ public class SyborgsTeleop extends NextFTCOpMode {
 	boolean slowDrive = false;
 	boolean autoPark = false;
 	int currentObeliskID = -1;
+
 	public boolean getRobotCentric() {
 		return false;
 	}
@@ -66,7 +65,9 @@ public class SyborgsTeleop extends NextFTCOpMode {
 	@Override
 	public void onInit() {
 		targetVelocity = NORMAL_VELOCITY;
+		RGBFlywheel.INSTANCE.setVelocityNow(0);
 	}
+
 	@Override
 	public void onStartButtonPressed() {
 		registerInputs();
@@ -83,14 +84,10 @@ public class SyborgsTeleop extends NextFTCOpMode {
 
 	private void updateHardware() {
 		RGBFlywheel.INSTANCE.setAnglerPositionNow(anglerPosition);
-		RGBFlywheel.INSTANCE.setVelocityNow(flywheelEnabled? targetVelocity : 0);
+		RGBFlywheel.INSTANCE.setVelocityNow(flywheelEnabled ? targetVelocity : 0);
 		RGBFlywheel.INSTANCE.setAutoAlignEnabled(autoAlign);
 	}
 
-	@Override
-	public void onStop() {
-		((SensorFusion) follower().getPoseTracker().getLocalizer()).ll.close();
-	}
 
 	private void registerInputs() {
 		handleManualAdjust();
@@ -168,6 +165,7 @@ public class SyborgsTeleop extends NextFTCOpMode {
 	public synchronized static void adjustAnglerPosition(double delta) {
 		anglerPosition += delta;
 	}
+
 	Vector input = new Vector();
 
 	private void driveRobot() {
@@ -194,7 +192,7 @@ public class SyborgsTeleop extends NextFTCOpMode {
 		if (!getRobotCentric()) {
 			input.rotateVector(-((SensorFusion) follower().getPoseTracker().getLocalizer()).getRawPinpointHeading());
 		}
-		follower().setTeleOpDrive(input.getXComponent(), input.getYComponent(), autoAlign? turnPower : rotate, true, getRobotCentric()? 0: headingOffset);
+		follower().setTeleOpDrive(input.getXComponent(), input.getYComponent(), autoAlign ? turnPower : rotate, true, getRobotCentric() ? 0 : headingOffset);
 
 		if (autoPark && !follower().isBusy()) {
 			follower().startTeleopDrive(true);
@@ -208,7 +206,7 @@ public class SyborgsTeleop extends NextFTCOpMode {
 	public void onWaitForStart() {
 		follower().update();
 
-		drawRobot(follower().getPose(),"#4CAF50");
+		drawRobot(follower().getPose(), "#4CAF50");
 
 		telemetry.addData("Alliance (press right bumper to change): ", Common.alliance.toString());
 		gamepad1().rightBumper()

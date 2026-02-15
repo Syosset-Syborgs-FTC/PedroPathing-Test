@@ -121,5 +121,37 @@ public class BlueAuton extends SyborgsAutonBase {
 
 					.build();
 		}
+		@Override
+		public PathChain getPreload() {
+			return Preload;
+		}
+		@Override
+		public PathChain getGPP() {
+			return GPP;
+		}
+		@Override
+		public PathChain getGPPReturn() {
+			return GPPReturn;
+		}
+		@Override
+		public PathChain getPGP() {
+			return PGP;
+		}
+		@Override
+		public PathChain getPGPReturn() {
+			return PGPReturn;
+		}
+		@Override
+		public PathChain getPPG() {
+			return PPG;
+		}
+		@Override
+		public PathChain getPPGReturn() {
+			return PPGReturn;
+		}
+		@Override
+		public PathChain getLeaveZone() {
+			return LeaveZone;
+		}
 	}
 }

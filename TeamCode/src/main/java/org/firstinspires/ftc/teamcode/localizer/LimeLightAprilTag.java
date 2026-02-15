@@ -7,6 +7,7 @@ import android.util.Pair;
 
 import com.pedropathing.ftc.InvertedFTCCoordinates;
 import com.pedropathing.ftc.PoseConverter;
+import com.pedropathing.geometry.PedroCoordinates;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
@@ -29,11 +30,8 @@ import java.util.stream.Collectors;
 
 public class LimeLightAprilTag {
 	Limelight3A limelight;
-	PortForwarder forwarder;
 	public LimeLightAprilTag(HardwareMap hardwareMap) {
 		limelight = hardwareMap.get(Limelight3A.class, "LimeLight3A");
-		forwarder = new PortForwarder("172.29.0.1", 5800, 5801, 5802, 5803, 5804, 5805, 5806, 5807, 5808, 5809);
-//		forwarder.start();
 
 		limelight.setPollRateHz(30);
 		limelight.start();
@@ -118,8 +116,5 @@ public class LimeLightAprilTag {
 			}
 		}
 		return -1;
-	}
-	public void close() {
-		forwarder.stop();
 	}
 }

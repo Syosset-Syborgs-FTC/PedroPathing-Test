@@ -2,6 +2,9 @@ package org.firstinspires.ftc.teamcode.localizer;
 
 import android.util.Pair;
 
+import com.pedropathing.ftc.FTCCoordinates;
+import com.pedropathing.ftc.InvertedFTCCoordinates;
+import com.pedropathing.ftc.PoseConverter;
 import com.pedropathing.ftc.localization.constants.PinpointConstants;
 import com.pedropathing.ftc.localization.localizers.PinpointLocalizer;
 import com.pedropathing.geometry.Pose;
@@ -14,6 +17,8 @@ import org.firstinspires.ftc.teamcode.control.PoseFilter;
 
 import java.util.Objects;
 import java.util.Optional;
+
+import dev.nextftc.ftc.ActiveOpMode;
 
 public class SensorFusion implements Localizer {
 	Pose startPose;
@@ -64,7 +69,7 @@ public class SensorFusion implements Localizer {
 		filter.setPose(pinpointLocalizer.getPose(), setPose);
 	}
 
-	ElapsedTime orientationTimer = new ElapsedTime();
+//	ElapsedTime orientationTimer = new ElapsedTime();
 
 	@Override
 	public void update() {
@@ -78,10 +83,10 @@ public class SensorFusion implements Localizer {
 			});
 		cachedMT1Pose = mt1Result.map(p -> p.first);
 		cachedMT2Pose = ll.localizeRobotMT2().map(p -> p.first);
-		if (orientationTimer.milliseconds() > 100) {
+//		if (orientationTimer.milliseconds() > 100) {
 			ll.updateRobotOrientation(filter.getPose(pinpointLocalizer.getPose()).getHeading());
-			orientationTimer.reset();
-		}
+//			orientationTimer.reset();
+//		}
 	}
 
 	@Override
