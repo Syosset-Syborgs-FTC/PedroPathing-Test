@@ -55,6 +55,7 @@ public class LimeLightAprilTag {
 			Pose3D pose = result.getBotpose();
 			if (Common.telemetry != null) {
 				Common.telemetry.addData("MT1 std dev", Arrays.toString(result.getStddevMt1()));
+
 //				for (double x : result.getStddevMt1()) {
 //					if (x > 20) {
 //						return Optional.empty();

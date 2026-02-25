@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.qualcomm.hardware.lynx.commands.core.LynxGetMotorEncoderPositionCommand;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -109,7 +110,6 @@ public class RGBFlywheel implements Subsystem {
 		}
 		telemetry.addData("Flywheel", currentVelocity);
 		telemetry.addData("Flywheel Target", targetVelocity);
-//		telemetry.addData("Flywheel Current", flywheel.getMotor().getCurrent(CurrentUnit.AMPS));
 		telemetry.addData("Flywheel Power", power);
 
 		flywheel.setPower(power);
